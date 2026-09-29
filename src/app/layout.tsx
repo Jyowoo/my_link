@@ -13,14 +13,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "마이링크 (MyLink)",
-  description: "마이링크 - 나만의 링크 모음 서비스",
+  title: "Jyowoo | Developer Profile",
+  description: "개발자 Jyowoo의 프로필과 프로젝트 링크 모음입니다.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
-      lang="en"
+      lang="ko"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
