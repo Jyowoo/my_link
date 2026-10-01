@@ -1,74 +1,82 @@
 @import "tailwindcss";
 
+/* design.md: base palette → semantic aliases → component styles. */
 :root {
-  --background: #f8fafc;
-  --foreground: #171717;
+  color-scheme: light;
+  --blue-500: oklch(0.620 0.191 258);
+  --blue-50: oklch(0.959 0.020 250);
+  --grey-900: oklch(0.237 0.020 258);
+  --grey-700: oklch(0.460 0.028 256);
+  --grey-600: oklch(0.562 0.025 254);
+  --grey-400: oklch(0.779 0.016 251);
+  --grey-200: oklch(0.930 0.005 248);
+  --grey-100: oklch(0.966 0.003 248);
+  --grey-50: oklch(0.985 0.002 248);
+  --white: oklch(1.000 0.000 0);
+  --tds-fg-primary: var(--grey-900);
+  --tds-fg-secondary: var(--grey-700);
+  --tds-fg-tertiary: oklch(0.155 0.060 261 / 0.58);
+  --tds-fg-quaternary: oklch(0.155 0.060 261 / 0.28);
+  --tds-fg-disabled: var(--grey-400);
+  --tds-fg-inverse: var(--white);
+  --tds-fg-brand: var(--blue-500);
+  --tds-bg-primary: var(--white);
+  --tds-bg-secondary: var(--grey-100);
+  --tds-bg-weak: var(--grey-50);
+  --tds-bg-brand: var(--blue-500);
+  --tds-bg-brand-weak: var(--blue-50);
+  --tds-line-default: var(--grey-200);
+  --tds-line-subtle: oklch(0 0 0 / 0.08);
+  --tds-press-overlay: oklch(0 0 0 / 0.26);
+  --tds-disabled-opacity: 0.30;
+  --radius-l: 14px;
+  --radius-xl: 16px;
+  --radius-3xl: 24px;
+  --radius-4xl: 32px;
+  --radius-full: 999px;
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+  --dur-slow: 320ms;
+}
+
+/* Dark semantic mapping is a project adaptation; design.md lists base values. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --tds-fg-primary: oklch(1 0 0);
+    --tds-fg-secondary: oklch(0.818 0.004 286);
+    --tds-fg-tertiary: oklch(0.701 0.009 286);
+    --tds-fg-quaternary: oklch(0.596 0.014 286);
+    --tds-fg-disabled: oklch(0.500 0.017 286);
+    --tds-bg-primary: oklch(0.297 0.016 285);
+    --tds-bg-secondary: oklch(0.361 0.019 285);
+    --tds-bg-weak: oklch(0.247 0.013 285);
+    --tds-bg-brand: oklch(0.630 0.192 258);
+    --tds-bg-brand-weak: oklch(0.300 0.062 267);
+    --tds-line-default: oklch(0.361 0.019 285);
+    --tds-line-subtle: oklch(1 0 0 / 0.08);
+  }
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-
-  --animate-gradient: gradient 8s ease infinite;
-  --animate-ring-spin: ring-spin 6s linear infinite;
-  --animate-pulse-soft: pulse-soft 2.5s ease-in-out infinite;
-  --animate-fade-in-up: fade-in-up 0.6s ease-out both;
+  --font-sans: var(--font-pretendard), "Pretendard Variable", Pretendard,
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro",
+    "Apple SD Gothic Neo", "Noto Sans KR", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #09090b;
-    --foreground: #ededed;
-  }
-}
-
+html { scroll-padding-top: 24px; }
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans, Arial, Helvetica, sans-serif);
+  margin: 0;
+  background: var(--tds-bg-weak);
+  color: var(--tds-fg-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
-
-/* ── Animated mesh-gradient background ── */
-@keyframes gradient {
-  0%,
-  100% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
+a { -webkit-tap-highlight-color: transparent; }
+a:focus-visible {
+  outline: 2px solid var(--tds-bg-brand);
+  outline-offset: 4px;
 }
-
-/* ── Avatar ring rotation ── */
-@keyframes ring-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* ── Status dot pulse ── */
-@keyframes pulse-soft {
-  0%,
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.6;
-    transform: scale(1.25);
-  }
-}
-
-/* ── Card entrance ── */
-@keyframes fade-in-up {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+::selection { background: var(--tds-bg-brand-weak); color: var(--tds-fg-primary); }
