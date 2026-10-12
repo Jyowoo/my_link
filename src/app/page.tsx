@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
+import { ProfileLinks } from "@/components/links/profile-links";
 import styles from "./page.module.css";
 
 type IconName = "code" | "github" | "folder" | "book" | "arrow";
@@ -16,10 +18,6 @@ function Icon({ name }: { name: IconName }) {
 }
 
 const techStacks = ["TypeScript", "React", "Next.js", "Tailwind CSS", "Node.js", "Git"];
-const links: { title: string; description: string; href?: string; icon: IconName }[] = [
-  { title: "프로젝트와 포트폴리오", description: "주요 프로젝트와 작업물을 모으고 있어요", icon: "folder" },
-  { title: "기술 블로그", description: "배운 점과 문제를 해결한 과정을 기록해요", icon: "book" },
-];
 
 export default function ProfilePage() {
   return (
@@ -27,7 +25,7 @@ export default function ProfilePage() {
       <div className={styles.container}>
         <header className={styles.topBar}>
           <a className={styles.wordmark} href="#profile" aria-label="Jyowoo 프로필로 이동">jyowoo<span aria-hidden="true">.</span></a>
-          <span className={styles.topLabel}>개발자 프로필</span>
+          <Link className={styles.topLabel} href="/links">링크 모음 보기 →</Link>
         </header>
 
         <article id="profile" className={styles.profile} aria-labelledby="profile-name">
@@ -53,12 +51,7 @@ export default function ProfilePage() {
 
         <section className={styles.links} aria-labelledby="links-title">
           <div className={styles.sectionHeader}><h2 id="links-title">더 알아보기</h2><span>작업과 이야기</span></div>
-          <ul className={styles.linkList}>
-            {links.map((link) => {
-              const content = <><span className={styles.linkIcon}><Icon name={link.icon} /></span><span className={styles.linkCopy}><span className={styles.linkTitle}>{link.title}</span><span className={styles.linkDescription}>{link.description}</span></span>{link.href ? <span className={styles.linkArrow}><Icon name="arrow" /></span> : <span className={styles.badge}>준비 중</span>}</>;
-              return <li key={link.title}>{link.href ? <a className={styles.linkRow} href={link.href}>{content}</a> : <div className={styles.linkRow}>{content}</div>}</li>;
-            })}
-          </ul>
+          <ProfileLinks />
         </section>
 
         <footer className={styles.footer}><span>© 2026 Jyowoo</span><span>좋은 경험을 만드는 일을 좋아해요</span></footer>

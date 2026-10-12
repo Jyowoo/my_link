@@ -1,0 +1,38 @@
+[
+  {
+    "id": "demo-link-portfolio",
+    "title": "포트폴리오",
+    "description": "직접 만든 프로젝트와 작업물을 소개해요.",
+    "url": "https://example.com/portfolio",
+    "icon": "FolderOpen",
+    "category": "portfolio",
+    "actionText": "작업 보기",
+    "isExternal": true,
+    "badge": "추천",
+    "displayOrder": 1
+  },
+  {
+    "id": "demo-link-blog",
+    "title": "블로그",
+    "description": "배운 내용과 문제를 해결한 과정을 기록해요.",
+    "url": "https://example.com/blog",
+    "icon": "BookOpen",
+    "category": "blog",
+    "actionText": "글 읽기",
+    "isExternal": true,
+    "badge": "NEW",
+    "displayOrder": 2
+  },
+  {
+    "id": "demo-link-social",
+    "title": "SNS",
+    "description": "소소한 일상과 최근 관심사를 공유해요.",
+    "url": "https://example.com/social",
+    "icon": "Instagram",
+    "category": "social",
+    "actionText": "소식 보기",
+    "isExternal": true,
+    "badge": null,
+    "displayOrder": 3
+  }
+]

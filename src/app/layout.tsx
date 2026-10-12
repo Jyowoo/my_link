@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import { LinksProvider } from "@/components/links/links-provider";
+import { FirebaseAnalytics } from "@/components/firebase-analytics";
 
 const pretendard = localFont({
   src: "./fonts/PretendardVariable.woff2",
@@ -20,7 +22,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="ko"
       className={`${pretendard.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <FirebaseAnalytics />
+        <LinksProvider>{children}</LinksProvider>
+      </body>
     </html>
   );
 }

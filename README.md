@@ -4,6 +4,8 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 First, run the development server:
 
+Copy `.env.example` to `.env.local` and fill in your Firebase web app configuration before starting. `.env.local` is excluded from Git. Set the same `NEXT_PUBLIC_FIREBASE_*` variables in your hosting environment before building for deployment. These browser settings are embedded in the client bundle at build time and are not server secrets.
+
 ```bash
 npm run dev
 # or
