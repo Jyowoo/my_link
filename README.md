@@ -36,3 +36,13 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Firestore link storage
+
+Links are loaded in real time from `users/anonymous/links`. New links are auto-ID documents with the link fields, `displayOrder`, and a server-generated `createdAt` timestamp. The profile and link list share this collection. Demo JSON is no longer loaded or automatically uploaded.
+
+Enable Cloud Firestore in the Firebase project configured by `.env.local`. Deployed security rules must allow the intended clients to read this collection and create link documents. The literal `anonymous` document is shared by all visitors; it is not a Firebase Authentication user ID. This change does not deploy security rules or enable authentication.
+
+Saving waits for server confirmation. On failure, the dialog preserves entered values for retry. Offline saves remain pending until the connection returns.
+
+The browser verification script requires a running app and a writable test Firebase project. It creates two persistent test links; run it against test data without concurrent writes.

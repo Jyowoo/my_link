@@ -79,19 +79,19 @@ async function main() {
   await send("Page.enable");
   await send("Page.navigate", { url: "http://localhost:3000/links" });
   await waitFor('!!document.querySelector("[data-slot=dialog-trigger]")', "page loads");
-  await delay(1000);
-  assert.equal(await count(), 3);
+  await waitFor('document.querySelector("section[aria-label] [role=alert]") === null && document.querySelector("section[aria-busy]")?.getAttribute("aria-busy") === "false"', "Firestore loaded");
+  const initialCount = await count();
 
   await openDialog();
   await waitFor('document.activeElement?.id === "link-title"', "initial focus");
   await click('form button[type="submit"]');
   await waitFor('!!document.querySelector("#link-title-error") && !!document.querySelector("#link-url-error")', "required errors");
-  assert.equal(await count(), 3);
+  assert.equal(await count(), initialCount);
   await fill("#link-title", "자동 검증 링크");
   await fill("#link-url", "javascript:alert(1)");
   await click('form button[type="submit"]');
   await waitFor('document.activeElement?.id === "link-url" && !!document.querySelector("#link-url-error")', "unsafe URL rejected");
-  assert.equal(await count(), 3);
+  assert.equal(await count(), initialCount);
   await escape();
   await waitFor('document.activeElement?.matches("[data-slot=dialog-trigger]")', "focus returns to trigger");
   console.log("PASS: dialog opens, initial focus, required fields, unsafe URL rejection, Escape and focus restoration");
@@ -107,7 +107,7 @@ async function main() {
   await fill("#link-badge", "TEST");
   await click('form button[type="submit"]');
   await waitFor('!document.querySelector("[role=dialog]")', "successful addition closes dialog");
-  assert.equal(await count(), 4);
+  await waitFor(`document.querySelectorAll('section[aria-label="링크 목록"] li').length === ${initialCount + 1}`, "saved link appears");
   const added = await evaluate(`(() => { const li=document.querySelector('section[aria-label="링크 목록"] li:last-child'); const a=li.querySelector('a'); return {title:li.querySelector('h3').textContent,text:li.textContent,url:a.getAttribute('href'),target:a.target,rel:a.rel}; })()`);
   assert.equal(added.title, "자동 검증 링크");
   assert.equal(added.url, "https://example.com/automated-test");
@@ -117,30 +117,30 @@ async function main() {
   console.log("PASS: successful addition, trimmed fields, final list position, description/action/badge, safe external link");
 
   await click('nav a[href="/"][data-slot="button"]');
-  await waitFor(`document.querySelectorAll('[aria-label="프로필 링크 목록"] li').length === 4`, "profile displays added link");
+  await waitFor(`document.querySelectorAll('[aria-label="프로필 링크 목록"] li').length === ${initialCount + 1}`, "profile displays added link");
   const profileLink = await evaluate(`(() => { const a=document.querySelector('[aria-label="프로필 링크 목록"] li:last-child a'); return {url:a.getAttribute('href'),text:a.textContent,target:a.target,rel:a.rel}; })()`);
   assert.equal(profileLink.url, added.url);
   assert.ok(profileLink.text.includes(added.title));
   assert.equal(profileLink.target, "_blank");
   assert.equal(profileLink.rel, "noopener noreferrer");
   await click('a[href="/links"]');
-  await waitFor(`document.querySelectorAll('section[aria-label="링크 목록"] li').length === 4`, "link list persists after navigation");
+  await waitFor(`document.querySelectorAll('section[aria-label="링크 목록"] li').length === ${initialCount + 1}`, "link list persists after navigation");
   console.log("PASS: profile shows added link; navigation preserves shared state and external link attributes");
 
   await openDialog();
   await fill("#link-title", "취소할 링크");
   await click('form button[type="button"]');
   await waitFor('!document.querySelector("[role=dialog]")', "cancel closes");
-  assert.equal(await count(), 4);
+  assert.equal(await count(), initialCount + 1);
   await openDialog();
   assert.equal(await evaluate('document.querySelector("#link-title").value'), "");
   assert.equal(await evaluate('document.querySelector("#link-protocol").value'), "https://");
   await escape();
   await send("Page.reload");
-  await waitFor(`document.querySelectorAll('section[aria-label="링크 목록"] li').length === 3`, "reload resets state");
+  await waitFor(`document.querySelectorAll('section[aria-label="링크 목록"] li').length === ${initialCount + 1}`, "reload preserves saved link");
   await delay(500);
-  assert.equal(await count(), 3);
-  console.log("PASS: cancellation, form reset, refresh resets local state");
+  assert.equal(await count(), initialCount + 1);
+  console.log("PASS: cancellation, form reset, refresh preserves Firestore data");
 
   await send("Emulation.setDeviceMetricsOverride", { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
   await openDialog();
@@ -153,7 +153,7 @@ async function main() {
   assert.equal(await evaluate('document.querySelector("#link-protocol").value'), "http://");
   await click('form button[type="submit"]');
   await waitFor('!document.querySelector("[role=dialog]")', "mobile submit");
-  assert.equal(await count(), 4);
+  await waitFor(`document.querySelectorAll('section[aria-label="링크 목록"] li').length === ${initialCount + 2}`, "mobile saved link appears");
   assert.equal(await evaluate(`document.querySelector('section[aria-label="링크 목록"] li:last-child a').getAttribute('href')`), "http://example.com/mobile");
   assert.ok(await evaluate('document.documentElement.scrollWidth <= window.innerWidth'));
   assert.deepEqual(failures, []);

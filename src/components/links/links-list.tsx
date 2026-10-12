@@ -9,7 +9,7 @@ import { useLinks } from "@/components/links/links-provider";
 import { LinkCard } from "@/components/links/link-card";
 
 export function LinksList() {
-  const { links, addLink } = useLinks();
+  const { links, loading, error, addLink } = useLinks();
 
   return (
     <main className="min-h-screen bg-background text-foreground">
@@ -29,21 +29,23 @@ export function LinksList() {
           <p className="mt-4 max-w-lg text-base leading-7 text-muted-foreground">만들고, 기록하고, 나누는 것들.<br />관심 있는 이야기를 골라 만나보세요.</p>
           <div className="mt-6 flex flex-wrap items-center gap-2">
             <Badge variant="outline">링크 {links.length}개</Badge>
-            <span className="text-xs text-muted-foreground">추가한 링크는 새로고침하면 사라져요</span>
+            <span className="text-xs text-muted-foreground">저장한 링크는 새로고침해도 유지돼요</span>
           </div>
-          <div className="mt-5"><AddLinkDialog onAdd={addLink} /></div>
+          <div className="mt-5"><AddLinkDialog onAdd={addLink} disabled={loading || !!error} /></div>
         </header>
 
-        <section aria-label="링크 목록">
+        <section aria-label="링크 목록" aria-busy={loading}>
+          {loading && <p role="status" className="py-6 text-muted-foreground">링크를 불러오는 중…</p>}
+          {error && <p role="alert" className="py-6 text-destructive">{error}</p>}
           <ul className="space-y-4">
             {links.map((link) => <li key={link.id}><LinkCard link={link} /></li>)}
           </ul>
-          {links.length === 0 && <p className="rounded-xl border border-dashed p-8 text-center text-muted-foreground">아직 등록된 링크가 없어요.</p>}
+          {!loading && !error && links.length === 0 && <p className="rounded-xl border border-dashed p-8 text-center text-muted-foreground">아직 등록된 링크가 없어요.</p>}
         </section>
 
         <footer className="mt-12 border-t pt-6 text-xs leading-6 text-muted-foreground">
           <p>작은 링크 하나에, 나다운 이야기를 담아요.</p>
-          <p>기본 링크 3개는 예시 주소입니다. 추가한 링크는 프로필에도 표시되며 새로고침하면 사라집니다.</p>
+          <p>저장한 링크는 프로필에도 표시됩니다.</p>
         </footer>
       </div>
     </main>
