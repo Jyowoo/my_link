@@ -32,7 +32,7 @@ function harness() {
     cleanup: () => cleanup?.(),
   };
 }
-function load(path, imports) {
+function load(path, imports, globals = {}) {
   const output = ts.transpileModule(fs.readFileSync(path, "utf8"), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX, target: ts.ScriptTarget.ES2022 },
   }).outputText;
@@ -47,7 +47,7 @@ function load(path, imports) {
     },
     Set,
     FormData: class { constructor(form) { this.data = form; } get(key) { return this.data[key]; } },
-    console: { error() {} }, URL, Intl,
+    console: { error() {} }, URL, Intl, ...globals,
   });
   return exports;
 }
@@ -127,10 +127,38 @@ rejectProfile(new Error("offline"));
 await Promise.resolve(); await Promise.resolve();
 assert.equal(state().error, null, "a previous user profile failure must not leak after logout");
 const { LoginNotice, AuthControls } = load("src/components/auth/auth-controls.tsx", {
-  "@/lib/user-profile": { getEmailDisplayName }, "next/link": { default: "Link" }, "@/components/auth/auth-provider": { useAuth: () => state() },
+  "@/components/auth/profile-menu": { ProfileMenu: "ProfileMenu" }, "@/lib/user-profile": { getEmailDisplayName }, "next/link": { default: "Link" }, "@/components/auth/auth-provider": { useAuth: () => state() },
 });
 assert.equal(JSON.stringify(LoginNotice()).includes("Google로 시작하기"), false);
 assert.equal(JSON.stringify(LoginNotice()).includes("Button"), false);
 assert.equal(JSON.stringify(AuthControls()).includes("Google로 로그인"), true);
+const menuHarness = harness();
+const notifications = [];
+let clipboardFailure = false, copiedUrl = null, logoutCalls = 0;
+const { ProfileMenu } = load("src/components/auth/profile-menu.tsx", {
+  sonner: { toast: { success: (...args) => notifications.push(["success", ...args]), error: (...args) => notifications.push(["error", ...args]) } }, react: menuHarness.react, "@/lib/user-profile": { getEmailDisplayName },
+  "@/components/auth/auth-provider": { useAuth: () => ({ user, profile: null, busy: false, logout: async () => { logoutCalls++; } }) },
+}, { navigator: { clipboard: { writeText: async (text) => { if (clipboardFailure) throw Error("blocked"); copiedUrl = text; } } }, window: { location: { origin: "https://mylink.example" } } });
+function findNode(node, predicate) {
+  if (!node || typeof node !== "object") return null;
+  if (predicate(node)) return node;
+  for (const child of [node.props?.children].flat(Infinity)) { const match = findNode(child, predicate); if (match) return match; }
+  return null;
+}
+const menu = () => menuHarness.render(() => ProfileMenu());
+const copyItem = () => findNode(menu(), (n) => n.type === "DropdownMenuItem" && [n.props.children].flat().includes("링크 복사"));
+await copyItem().props.onSelect();
+assert.equal(copiedUrl, "https://mylink.example/");
+assert.equal(notifications.at(-1)[0], "success");
+assert.equal(notifications.at(-1)[2].id, "profile-link-copy");
+clipboardFailure = true;
+await copyItem().props.onSelect();
+assert.equal(notifications.at(-1)[0], "error");
+assert.equal(notifications.at(-1)[2].id, "profile-link-copy");
+const previewLink = findNode(menu(), (n) => n.type === "a" && n.props.href === "/preview");
+assert.equal(previewLink.props.target, "_blank");
+assert.equal(previewLink.props.rel, "noopener noreferrer");
+await findNode(menu(), (n) => n.type === "DropdownMenuItem" && [n.props.children].flat().includes("로그아웃")).props.onSelect();
+assert.equal(logoutCalls, 1);
 h.cleanup();
 console.log("PASS: auth loading, login/logout, header-only login, delayed popup cancellation and immediate retry, stale errors, nonblocking profile writes.");

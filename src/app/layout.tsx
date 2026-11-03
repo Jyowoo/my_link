@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { AuthProvider } from "@/components/auth/auth-provider";
 import { LinksProvider } from "@/components/links/links-provider";
+import { Toaster } from "@/components/ui/sonner";
 import { FirebaseAnalytics } from "@/components/firebase-analytics";
 
 const pretendard = localFont({
@@ -25,6 +26,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         <FirebaseAnalytics />
+        <Toaster />
         <AuthProvider><LinksProvider>{children}</LinksProvider></AuthProvider>
       </body>
     </html>

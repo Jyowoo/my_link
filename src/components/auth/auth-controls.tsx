@@ -3,18 +3,16 @@
 import { getEmailDisplayName } from "@/lib/user-profile";
 
 import Link from "next/link";
-import { LogIn, LogOut, UserRound } from "lucide-react";
+import { LogIn, UserRound } from "lucide-react";
+import { ProfileMenu } from "@/components/auth/profile-menu";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/components/auth/auth-provider";
 
 export function AuthControls() {
-  const { user, profile, loading, busy, error, login, logout } = useAuth();
+  const { user, loading, busy, error, login } = useAuth();
   return <div className="min-w-0 text-right">
     <div className="flex flex-wrap items-center justify-end gap-2">
-      {loading ? <span role="status" className="text-sm text-muted-foreground">로그인 확인 중…</span> : user ? <>
-        <span className="max-w-36 truncate text-sm font-semibold">{profile?.displayName || getEmailDisplayName(user.email)}</span>
-        <Button variant="outline" className="min-h-11" disabled={busy} onClick={logout}><LogOut aria-hidden="true" />로그아웃</Button>
-      </> : <Button className="min-h-11" disabled={busy} onClick={login}><LogIn aria-hidden="true" />Google로 로그인</Button>}
+      {loading ? <span role="status" className="text-sm text-muted-foreground">로그인 확인 중…</span> : user ? <ProfileMenu /> : <Button className="min-h-11" disabled={busy} onClick={login}><LogIn aria-hidden="true" />Google로 로그인</Button>}
     </div>
     {error && <p role="alert" className="mt-2 max-w-sm text-sm text-destructive">{error}</p>}
   </div>;
