@@ -118,7 +118,7 @@ async function main() {
 
   await click('nav a[href="/"][data-slot="button"]');
   await waitFor(`document.querySelectorAll('[aria-label="프로필 링크 목록"] li').length === ${initialCount + 1}`, "profile displays added link");
-  const profileLink = await evaluate(`(() => { const a=document.querySelector('[aria-label="프로필 링크 목록"] li:last-child a'); return {url:a.getAttribute('href'),text:a.textContent,target:a.target,rel:a.rel}; })()`);
+  const profileLink = await evaluate(`(() => { const a=document.querySelector('[aria-label="프로필 링크 목록"] li:last-child a'); return {url:a.getAttribute('href'),text:a.closest("li").textContent,target:a.target,rel:a.rel}; })()`);
   assert.equal(profileLink.url, added.url);
   assert.ok(profileLink.text.includes(added.title));
   assert.equal(profileLink.target, "_blank");

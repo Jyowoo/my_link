@@ -6,7 +6,6 @@
 .topBar { height: 56px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
 .wordmark { display: inline-flex; align-items: center; min-height: 44px; color: var(--tds-fg-primary); font-size: 22px; font-weight: 700; letter-spacing: -0.04em; border-radius: 8px; }
 .wordmark span { color: var(--tds-fg-secondary); }
-.topLabel { font-size: 13px; color: var(--tds-fg-tertiary); }
 .profile { padding: 32px; background: var(--tds-bg-primary); border: 1px solid var(--tds-line-subtle); border-radius: var(--radius-4xl); animation: appear var(--dur-slow) var(--ease) both; }
 .profileHeader { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 32px; }
 .avatar { display: grid; place-items: center; width: 64px; height: 64px; flex-shrink: 0; background: var(--tds-bg-secondary); border-radius: 20px; color: var(--tds-fg-primary); }

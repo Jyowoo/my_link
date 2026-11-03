@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import { AuthProvider } from "@/components/auth/auth-provider";
 import { LinksProvider } from "@/components/links/links-provider";
 import { FirebaseAnalytics } from "@/components/firebase-analytics";
 
@@ -12,8 +13,8 @@ const pretendard = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Jyowoo | Developer Profile",
-  description: "개발자 Jyowoo의 프로필과 프로젝트 링크 모음입니다.",
+  title: "마이링크 | 나만의 링크",
+  description: "Google 로그인으로 내 프로필과 링크를 관리하세요.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -24,7 +25,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         <FirebaseAnalytics />
-        <LinksProvider>{children}</LinksProvider>
+        <AuthProvider><LinksProvider>{children}</LinksProvider></AuthProvider>
       </body>
     </html>
   );
