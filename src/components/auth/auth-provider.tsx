@@ -1,13 +1,13 @@
 "use client";
 
-import { getEmailDisplayName } from "@/lib/user-profile";
+import { initializeUserProfile } from "@/lib/profile-store";
 
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut, type User } from "firebase/auth";
-import { doc, onSnapshot, serverTimestamp, setDoc } from "firebase/firestore";
+import { doc, onSnapshot } from "firebase/firestore";
 import { auth, firestore } from "@/lib/firebase";
 
-type UserProfile = { displayName: string; email: string; photoURL: string; bio: string };
+type UserProfile = { displayNameKey: string; displayName: string; email: string; photoURL: string; bio: string };
 type AuthState = {
   user: User | null; profile: UserProfile | null; loading: boolean;
   profileLoading: boolean; busy: boolean; error: string | null; profileError: string | null;
@@ -30,6 +30,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const loginAttempt = useRef(0);
   useEffect(() => onAuthStateChanged(auth, (next) => {
     setUser(next); setLoading(false);
+    if (next) void initializeUserProfile(next).catch(() => {
+      if (auth.currentUser?.uid === next.uid) setError("사용자 정보를 준비하지 못했어요. Firestore 규칙과 연결을 확인해주세요.");
+    });
   }, (cause) => { setUser(null); setLoading(false); setError(message(cause)); }), []);
 
   async function login() {
@@ -43,15 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       provider.setCustomParameters({ prompt: "select_account" });
       const { user: signedIn } = await signInWithPopup(auth, provider);
       if (attempt !== loginAttempt.current || auth.currentUser?.uid !== signedIn.uid) return;
-      // Profile persistence must not block authentication or logout (for example offline).
-      void setDoc(doc(firestore, "users", signedIn.uid), {
-        displayName: getEmailDisplayName(signedIn.email), email: signedIn.email ?? "",
-        photoURL: signedIn.photoURL ?? "", updatedAt: serverTimestamp(),
-      }, { merge: true }).catch(() => {
-        if (attempt === loginAttempt.current && auth.currentUser?.uid === signedIn.uid) {
-          setError("로그인했지만 사용자 정보를 저장하지 못했어요. Firestore 접근 권한을 확인해주세요.");
-        }
-      });
+
     } catch (cause) {
       if (attempt !== loginAttempt.current) return;
       const code = (cause as { code?: string })?.code;
@@ -79,7 +74,7 @@ function UserProfileScope({ children, ...state }: Omit<AuthState, "profile" | "p
       if (!active) return;
       const data = snapshot.data();
       const text = (key: string) => typeof data?.[key] === "string" ? data[key] as string : "";
-      setProfile(snapshot.exists() ? { displayName: text("displayName"), email: text("email"), photoURL: text("photoURL"), bio: text("bio") } : null);
+      setProfile(snapshot.exists() ? { displayNameKey: text("displayNameKey"), displayName: text("displayName"), email: text("email"), photoURL: text("photoURL"), bio: text("bio") } : null);
       setProfileLoading(false); setProfileError(null);
     }, () => {
       if (!active) return;

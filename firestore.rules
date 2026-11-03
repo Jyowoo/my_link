@@ -4,11 +4,59 @@ service cloud.firestore {
     function isOwner(uid) {
       return request.auth != null && request.auth.uid == uid;
     }
+    function validProfile(uid) {
+      let data = request.resource.data;
+      return data.displayName is string
+        && data.displayName.matches('[a-zA-Z0-9가-힣._+-]{2,30}')
+        && data.displayNameKey == data.displayName.lower()
+        && !(data.displayNameKey in ['links', 'preview', 'settings', 'api', '_next', 'favicon.ico', 'robots.txt', 'sitemap.xml', '.', '..'])
+        && data.bio is string && data.bio.size() <= 200
+        && data.email is string
+        && data.photoURL is string && data.photoURL.size() <= 2048
+        && (data.photoURL == '' || data.photoURL.matches('https://.+'))
+        && getAfter(/databases/$(database)/documents/displayNames/$(data.displayNameKey)).data.uid == uid
+        && getAfter(/databases/$(database)/documents/displayNames/$(data.displayNameKey)).data.displayName == data.displayName
+        && getAfter(/databases/$(database)/documents/displayNames/$(data.displayNameKey)).data.bio == data.bio
+        && getAfter(/databases/$(database)/documents/displayNames/$(data.displayNameKey)).data.photoURL == data.photoURL;
+    }
+    function releasesPreviousName() {
+      return !('displayNameKey' in resource.data)
+        || resource.data.displayNameKey == request.resource.data.displayNameKey
+        || !existsAfter(/databases/$(database)/documents/displayNames/$(resource.data.displayNameKey));
+    }
+    function isPublished(uid) {
+      let profile = get(/databases/$(database)/documents/users/$(uid)).data;
+      return profile.displayNameKey is string
+        && get(/databases/$(database)/documents/displayNames/$(profile.displayNameKey)).data.uid == uid;
+    }
+    function validPublicProfile(nameKey) {
+      let data = request.resource.data;
+      let user = getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+      return data.keys().hasOnly(['uid', 'displayName', 'bio', 'photoURL'])
+        && data.uid == request.auth.uid && user.displayNameKey == nameKey
+        && user.displayName.lower() == nameKey && data.displayName == user.displayName
+        && data.bio == user.bio && data.photoURL == user.photoURL;
+    }
     match /users/{uid} {
-      allow read, create, update, delete: if isOwner(uid);
+      allow read: if isOwner(uid);
+      allow create: if isOwner(uid) && validProfile(uid);
+      allow update: if isOwner(uid) && validProfile(uid) && releasesPreviousName();
+      allow delete: if isOwner(uid) && (!('displayNameKey' in resource.data)
+        || !existsAfter(/databases/$(database)/documents/displayNames/$(resource.data.displayNameKey)));
       match /links/{linkId} {
-        allow read, create, update, delete: if isOwner(uid);
+        allow read: if isOwner(uid) || isPublished(uid);
+        allow create, update, delete: if isOwner(uid);
       }
+    }
+    match /displayNames/{nameKey} {
+      // Only public profile fields are stored here; email remains private.
+      allow get: if true;
+      allow create: if request.auth != null && validPublicProfile(nameKey);
+      allow update: if request.auth != null && resource.data.uid == request.auth.uid
+        && validPublicProfile(nameKey);
+      allow delete: if request.auth != null && resource.data.uid == request.auth.uid
+        && (!existsAfter(/databases/$(database)/documents/users/$(request.auth.uid))
+          || getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data.displayNameKey != nameKey);
     }
   }
 }

@@ -51,7 +51,7 @@ function load(path, imports, globals = {}) {
   });
   return exports;
 }
-const { getEmailDisplayName } = load("src/lib/user-profile.ts", {});
+const { getEmailDisplayName, publicProfilePath } = load("src/lib/user-profile.ts", {});
 assert.equal(getEmailDisplayName("sample.name+tag@example.com"), "sample.name+tag");
 assert.equal(getEmailDisplayName(null), "사용자");
 assert.equal(getEmailDisplayName(""), "사용자");
@@ -73,7 +73,11 @@ const firestoreSdk = {
   doc: (_, ...parts) => parts.join("/"), serverTimestamp: () => "server-time",
   setDoc: async (...args) => { writes.push(args); if (profileWrite) await profileWrite; }, onSnapshot: () => () => {},
 };
-const { AuthProvider } = load("src/components/auth/auth-provider.tsx", { "@/lib/user-profile": { getEmailDisplayName }, react: h.react, "firebase/auth": authSdk, "firebase/firestore": firestoreSdk, "@/lib/firebase": { auth, firestore: {} } });
+const initializeUserProfile = async (value) => {
+  writes.push(["users/" + value.uid, { displayName: getEmailDisplayName(value.email), email: value.email }, { merge: true }]);
+  if (profileWrite) await profileWrite;
+};
+const { AuthProvider } = load("src/components/auth/auth-provider.tsx", { "@/lib/profile-store": { initializeUserProfile }, react: h.react, "firebase/auth": authSdk, "firebase/firestore": firestoreSdk, "@/lib/firebase": { auth, firestore: {} } });
 const state = () => h.render(() => AuthProvider({ children: null })).props;
 assert.equal(state().loading, true);
 nextAuth(null);
@@ -127,7 +131,7 @@ rejectProfile(new Error("offline"));
 await Promise.resolve(); await Promise.resolve();
 assert.equal(state().error, null, "a previous user profile failure must not leak after logout");
 const { LoginNotice, AuthControls } = load("src/components/auth/auth-controls.tsx", {
-  "@/components/auth/profile-menu": { ProfileMenu: "ProfileMenu" }, "@/lib/user-profile": { getEmailDisplayName }, "next/link": { default: "Link" }, "@/components/auth/auth-provider": { useAuth: () => state() },
+  "@/components/auth/profile-menu": { ProfileMenu: "ProfileMenu" }, "@/lib/user-profile": { getEmailDisplayName, publicProfilePath }, "next/link": { default: "Link" }, "@/components/auth/auth-provider": { useAuth: () => state() },
 });
 assert.equal(JSON.stringify(LoginNotice()).includes("Google로 시작하기"), false);
 assert.equal(JSON.stringify(LoginNotice()).includes("Button"), false);
@@ -136,8 +140,8 @@ const menuHarness = harness();
 const notifications = [];
 let clipboardFailure = false, copiedUrl = null, logoutCalls = 0;
 const { ProfileMenu } = load("src/components/auth/profile-menu.tsx", {
-  sonner: { toast: { success: (...args) => notifications.push(["success", ...args]), error: (...args) => notifications.push(["error", ...args]) } }, react: menuHarness.react, "@/lib/user-profile": { getEmailDisplayName },
-  "@/components/auth/auth-provider": { useAuth: () => ({ user, profile: null, busy: false, logout: async () => { logoutCalls++; } }) },
+  "next/link": { default: "Link" }, sonner: { toast: { success: (...args) => notifications.push(["success", ...args]), error: (...args) => notifications.push(["error", ...args]) } }, react: menuHarness.react, "@/lib/user-profile": { getEmailDisplayName, publicProfilePath },
+  "@/components/auth/auth-provider": { useAuth: () => ({ user, profile: { displayName: "test", displayNameKey: "test" }, busy: false, logout: async () => { logoutCalls++; } }) },
 }, { navigator: { clipboard: { writeText: async (text) => { if (clipboardFailure) throw Error("blocked"); copiedUrl = text; } } }, window: { location: { origin: "https://mylink.example" } } });
 function findNode(node, predicate) {
   if (!node || typeof node !== "object") return null;
@@ -148,7 +152,7 @@ function findNode(node, predicate) {
 const menu = () => menuHarness.render(() => ProfileMenu());
 const copyItem = () => findNode(menu(), (n) => n.type === "DropdownMenuItem" && [n.props.children].flat().includes("링크 복사"));
 await copyItem().props.onSelect();
-assert.equal(copiedUrl, "https://mylink.example/");
+assert.equal(copiedUrl, "https://mylink.example/test");
 assert.equal(notifications.at(-1)[0], "success");
 assert.equal(notifications.at(-1)[2].id, "profile-link-copy");
 clipboardFailure = true;
