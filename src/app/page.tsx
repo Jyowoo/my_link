@@ -1,9 +1,16 @@
+import { pageMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { HomeExperience } from "@/components/home/home-experience";
 import { LandingPage } from "@/components/home/landing-page";
 import { AuthControls, ManageLinksButton, UserProfile } from "@/components/auth/auth-controls";
 import { ProfileLinks } from "@/components/links/profile-links";
 import styles from "./page.module.css";
+
+export const metadata = pageMetadata({
+  title: "마이링크 — 나를 보여주는 단 하나의 링크",
+  description: "포트폴리오, 블로그, SNS 링크를 한 페이지에 모으고 내 주소로 공유하세요. 마이링크에서 방문자 클릭 통계도 확인할 수 있어요.",
+  canonical: "/",
+});
 
 export default function ProfilePage() {
   return <HomeExperience landing={<LandingPage />}><main className={styles.page}>

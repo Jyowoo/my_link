@@ -3,7 +3,7 @@ import { firestore } from "@/lib/firebase";
 import { normalizeUsername, validateUsername } from "@/lib/user-profile";
 import { validateLink, type ProfileLink } from "@/lib/links";
 
-export async function getPublicProfile(name: string) {
+export async function getPublicIdentity(name: string) {
   // This Next.js version can pass URL-encoded dynamic segments to the page.
   let decodedName: string;
   try { decodedName = decodeURIComponent(name); } catch { return null; }
@@ -14,7 +14,17 @@ export async function getPublicProfile(name: string) {
   const data = record.data();
   // Public documents are projections; never read the private users/{uid} document.
   if (typeof data.uid !== "string" || !data.uid || data.uid.includes("/") || typeof data.displayName !== "string" || data.username !== key) return null;
-  const snapshot = await getDocsFromServer(query(collection(firestore, "users", data.uid, "links"), orderBy("displayOrder")));
+  return {
+    uid: data.uid, username: key, displayName: data.displayName,
+    bio: typeof data.bio === "string" ? data.bio : "",
+    photoURL: typeof data.photoURL === "string" && data.photoURL.startsWith("https://") ? data.photoURL : "",
+  };
+}
+
+export async function getPublicProfile(name: string) {
+  const profile = await getPublicIdentity(name);
+  if (!profile) return null;
+  const snapshot = await getDocsFromServer(query(collection(firestore, "users", profile.uid, "links"), orderBy("displayOrder")));
   const links = snapshot.docs.flatMap((entry) => {
     const link = entry.data();
     if (typeof link.title !== "string" || typeof link.url !== "string" || Object.keys(validateLink(link.title, link.url)).length) return [];
@@ -29,10 +39,5 @@ export async function getPublicProfile(name: string) {
       isExternal: true, displayOrder: typeof link.displayOrder === "number" ? link.displayOrder : 0,
     } satisfies ProfileLink];
   });
-  return {
-    uid: data.uid, username: key, displayName: data.displayName,
-    bio: typeof data.bio === "string" ? data.bio : "",
-    photoURL: typeof data.photoURL === "string" && data.photoURL.startsWith("https://") ? data.photoURL : "",
-    links,
-  };
+  return { ...profile, links };
 }

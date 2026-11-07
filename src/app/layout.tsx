@@ -13,9 +13,15 @@ const pretendard = localFont({
   display: "swap",
 });
 
+const deploymentHost = process.env.VERCEL_ENV === "preview"
+  ? process.env.VERCEL_URL
+  : process.env.VERCEL_PROJECT_PRODUCTION_URL ?? process.env.VERCEL_URL;
+
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || (deploymentHost ? `https://${deploymentHost}` : "http://localhost:3000")),
+  applicationName: "마이링크",
   title: "마이링크 | 나만의 링크",
-  description: "Google 로그인으로 내 프로필과 링크를 관리하세요.",
+  description: "나를 소개하는 링크를 한곳에 모아 내 주소로 공유하세요.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

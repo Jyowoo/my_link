@@ -1,9 +1,12 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { UserProfile } from "@/components/auth/auth-controls";
 import { ProfileLinks } from "@/components/links/profile-links";
 
-export const metadata: Metadata = { title: "내 페이지 미리보기 | 마이링크", robots: { index: false, follow: false } };
+export const metadata = pageMetadata({
+  title: "내 페이지 미리보기 | 마이링크",
+  description: "공개하기 전에 내 마이링크 프로필과 링크 목록의 모습을 확인하세요.",
+});
 
 export default function PreviewPage() {
   return <main className="mx-auto min-h-screen w-full max-w-xl px-6 py-8">

@@ -1,3 +1,7 @@
+import type { Metadata } from "next";
+import { cache } from "react";
+import { pageMetadata } from "@/lib/seo";
+import { publicProfilePath } from "@/lib/user-profile";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AuthControls } from "@/components/auth/auth-controls";
@@ -6,9 +10,28 @@ import { getPublicProfile } from "@/lib/public-profile";
 import { UserRound } from "lucide-react";
 
 export const dynamic = "force-dynamic";
-export default async function PublicProfilePage({ params }: { params: Promise<{ username: string }> }) {
+
+const loadProfile = cache(getPublicProfile);
+type ProfilePageProps = { params: Promise<{ username: string }> };
+
+export async function generateMetadata({ params }: ProfilePageProps): Promise<Metadata> {
   const { username } = await params;
-  const profile = await getPublicProfile(username);
+  const profile = await loadProfile(username);
+  if (!profile) notFound();
+
+  const bio = Array.from(profile.bio.replace(/\s+/g, " ").trim());
+  const description = bio.length > 150 ? bio.slice(0, 149).join("") + "…" : bio.join("");
+  return pageMetadata({
+    title: `${profile.displayName}의 링크 | 마이링크`,
+    description: description || `${profile.displayName}님의 작업과 이야기를 담은 링크를 한곳에서 만나보세요.`,
+    canonical: publicProfilePath(profile.username),
+    username: profile.username,
+  });
+}
+
+export default async function PublicProfilePage({ params }: ProfilePageProps) {
+  const { username } = await params;
+  const profile = await loadProfile(username);
   if (!profile) notFound();
   return <main className="mx-auto min-h-screen w-full max-w-xl px-6 py-8">
     <header className="mb-8 flex flex-wrap items-center justify-between gap-3">
