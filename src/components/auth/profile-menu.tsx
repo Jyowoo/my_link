@@ -12,7 +12,7 @@ export function ProfileMenu() {
   const { user, profile, busy, logout } = useAuth();
   if (!user) return null;
   const name = profile?.displayName || getEmailDisplayName(user.email);
-  const pagePath = profile?.displayNameKey ? publicProfilePath(name) : null;
+  const pagePath = profile?.username ? publicProfilePath(profile.username) : null;
   async function copyLink() {
     if (!pagePath) { toast.error("프로필을 준비 중이에요. 잠시 후 다시 시도해주세요."); return; }
     try {

@@ -6,9 +6,9 @@ import { getPublicProfile } from "@/lib/public-profile";
 import { UserRound } from "lucide-react";
 
 export const dynamic = "force-dynamic";
-export default async function PublicProfilePage({ params }: { params: Promise<{ displayName: string }> }) {
-  const { displayName } = await params;
-  const profile = await getPublicProfile(displayName);
+export default async function PublicProfilePage({ params }: { params: Promise<{ username: string }> }) {
+  const { username } = await params;
+  const profile = await getPublicProfile(username);
   if (!profile) notFound();
   return <main className="mx-auto min-h-screen w-full max-w-xl px-6 py-8">
     <header className="mb-8 flex flex-wrap items-center justify-between gap-3">

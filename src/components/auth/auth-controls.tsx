@@ -12,7 +12,7 @@ export function AuthControls() {
   const { user, profile, loading, busy, error, login } = useAuth();
   return <div className="min-w-0 text-right">
     <div className="flex flex-wrap items-center justify-end gap-2">
-      {loading ? <span role="status" className="text-sm text-muted-foreground">로그인 확인 중…</span> : user ? <>{profile?.displayNameKey && <Button asChild variant="ghost" className="min-h-11"><Link href={publicProfilePath(profile.displayName)}>내 페이지</Link></Button>}<ProfileMenu /></> : <Button className="min-h-11" disabled={busy} onClick={login}><LogIn aria-hidden="true" />Google로 로그인</Button>}
+      {loading ? <span role="status" className="text-sm text-muted-foreground">로그인 확인 중…</span> : user ? <>{profile?.username && <Button asChild variant="ghost" className="min-h-11"><Link href={publicProfilePath(profile.username)}>내 페이지</Link></Button>}<ProfileMenu /></> : <Button className="min-h-11" disabled={busy} onClick={login}><LogIn aria-hidden="true" />Google로 로그인</Button>}
     </div>
     {error && <p role="alert" className="mt-2 max-w-sm text-sm text-destructive">{error}</p>}
   </div>;

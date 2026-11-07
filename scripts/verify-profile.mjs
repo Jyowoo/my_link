@@ -71,6 +71,29 @@ assert.equal(race.filter((result) => result.status === "rejected").length, 1);
 for (const [path, profile] of records) {
   if (path.startsWith("users/")) assert.equal(records.get("displayNames/" + profile.displayNameKey).uid, path.split("/")[1]);
 }
+assert.equal(records.get("users/accountA").username, "same");
+assert.equal(records.get("users/accountB").username, "same-accountb");
+const addressDraft = (owner, username, displayName = records.get("users/" + owner.user.uid).displayName) => ({ displayName, bio: "주소 변경", username });
+await a.saveUserProfile(a.user, addressDraft(a, "profile-one"));
+assert.equal(records.has("usernames/same"), false);
+assert.equal(await b.isUsernameAvailable(b.user.uid, "PROFILE-ONE"), false);
+await assert.rejects(b.saveUserProfile(b.user, addressDraft(b, "profile-one")), /이미 사용 중인 주소/);
+await a.saveUserProfile(a.user, addressDraft(a, "profile-one", "FreshName"));
+assert.equal(records.get("users/accountA").username, "profile-one", "display-name edits must not change the address");
+await a.saveUserProfile(a.user, addressDraft(a, "profile-two"));
+assert.equal(await b.isUsernameAvailable(b.user.uid, "profile-one"), true);
+assert.equal(records.has("usernames/profile-one"), false);
+const addressRace = await Promise.allSettled([a.saveUserProfile(a.user, addressDraft(a, "race-address")), b.saveUserProfile(b.user, addressDraft(b, "RACE-ADDRESS"))]);
+assert.equal(addressRace.filter((result) => result.status === "fulfilled").length, 1);
+for (const [path, profile] of records) {
+  if (path.startsWith("users/")) {
+    assert.equal(records.get("usernames/" + profile.username).uid, path.split("/")[1]);
+    assert.equal(records.get("usernames/" + profile.username).displayName, profile.displayName);
+  }
+}
+assert.ok(validation.validateUsername("links"));
+assert.ok(validation.validateUsername("한글주소"));
+assert.equal(validation.normalizeUsername(" My-Page "), "my-page");
 a.auth.currentUser = { uid: "different-account" };
 await assert.rejects(a.saveUserProfile(a.user, draft("StaleName")), /로그인 상태/);
 assert.equal(records.has("displayNames/stalename"), false);

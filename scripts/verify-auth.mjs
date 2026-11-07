@@ -141,7 +141,7 @@ const notifications = [];
 let clipboardFailure = false, copiedUrl = null, logoutCalls = 0;
 const { ProfileMenu } = load("src/components/auth/profile-menu.tsx", {
   "next/link": { default: "Link" }, sonner: { toast: { success: (...args) => notifications.push(["success", ...args]), error: (...args) => notifications.push(["error", ...args]) } }, react: menuHarness.react, "@/lib/user-profile": { getEmailDisplayName, publicProfilePath },
-  "@/components/auth/auth-provider": { useAuth: () => ({ user, profile: { displayName: "test", displayNameKey: "test" }, busy: false, logout: async () => { logoutCalls++; } }) },
+  "@/components/auth/auth-provider": { useAuth: () => ({ user, profile: { displayName: "test", displayNameKey: "test", username: "test" }, busy: false, logout: async () => { logoutCalls++; } }) },
 }, { navigator: { clipboard: { writeText: async (text) => { if (clipboardFailure) throw Error("blocked"); copiedUrl = text; } } }, window: { location: { origin: "https://mylink.example" } } });
 function findNode(node, predicate) {
   if (!node || typeof node !== "object") return null;

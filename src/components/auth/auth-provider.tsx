@@ -7,7 +7,7 @@ import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut, type 
 import { doc, onSnapshot } from "firebase/firestore";
 import { auth, firestore } from "@/lib/firebase";
 
-type UserProfile = { displayNameKey: string; displayName: string; email: string; photoURL: string; bio: string };
+type UserProfile = { username: string; displayNameKey: string; displayName: string; email: string; photoURL: string; bio: string };
 type AuthState = {
   user: User | null; profile: UserProfile | null; loading: boolean;
   profileLoading: boolean; busy: boolean; error: string | null; profileError: string | null;
@@ -74,7 +74,7 @@ function UserProfileScope({ children, ...state }: Omit<AuthState, "profile" | "p
       if (!active) return;
       const data = snapshot.data();
       const text = (key: string) => typeof data?.[key] === "string" ? data[key] as string : "";
-      setProfile(snapshot.exists() ? { displayNameKey: text("displayNameKey"), displayName: text("displayName"), email: text("email"), photoURL: text("photoURL"), bio: text("bio") } : null);
+      setProfile(snapshot.exists() ? { username: text("username"), displayNameKey: text("displayNameKey"), displayName: text("displayName"), email: text("email"), photoURL: text("photoURL"), bio: text("bio") } : null);
       setProfileLoading(false); setProfileError(null);
     }, () => {
       if (!active) return;
