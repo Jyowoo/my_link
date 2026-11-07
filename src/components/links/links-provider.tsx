@@ -10,9 +10,9 @@ const LinksContext = createContext<{
   links: ProfileLink[];
   loading: boolean;
   error: string | null;
-  updateLink: (id: string, draft: Omit<ProfileLink, "id" | "displayOrder">) => Promise<void>;
+  updateLink: (id: string, draft: Omit<ProfileLink, "id" | "displayOrder" | "clickCount">) => Promise<void>;
   deleteLink: (id: string) => Promise<void>;
-  addLink: (draft: Omit<ProfileLink, "id" | "displayOrder">) => Promise<void>;
+  addLink: (draft: Omit<ProfileLink, "id" | "displayOrder" | "clickCount">) => Promise<void>;
 } | null>(null);
 
 export function LinksProvider({ children }: { children: ReactNode }) {
@@ -53,15 +53,16 @@ function UserLinksProvider({ uid, children }: { uid: string; children: ReactNode
     return () => { active = false; unsubscribe(); };
   }, [uid]);
 
-  async function addLink(draft: Omit<ProfileLink, "id" | "displayOrder">) {
+  async function addLink(draft: Omit<ProfileLink, "id" | "displayOrder" | "clickCount">) {
     requireOwner();
     await addDoc(collection(firestore, "users", uid, "links"), {
       ...draft,
       displayOrder: Math.max(0, ...links.map((link) => link.displayOrder)) + 1,
+      clickCount: 0,
       createdAt: serverTimestamp(),
     });
   }
-  async function updateLink(id: string, draft: Omit<ProfileLink, "id" | "displayOrder">) {
+  async function updateLink(id: string, draft: Omit<ProfileLink, "id" | "displayOrder" | "clickCount">) {
     requireOwner();
     await updateDoc(doc(firestore, "users", uid, "links", id), { ...draft, updatedAt: serverTimestamp() });
   }

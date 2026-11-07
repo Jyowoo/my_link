@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { validateLink, type ProfileLink } from "@/lib/links";
 
-export type LinkDraft = Omit<ProfileLink, "id" | "displayOrder">;
+export type LinkDraft = Omit<ProfileLink, "id" | "displayOrder" | "clickCount">;
 
 export function LinkForm({ initialValue, onSave, onCancel, onBusyChange, idPrefix }: {
   initialValue?: ProfileLink;

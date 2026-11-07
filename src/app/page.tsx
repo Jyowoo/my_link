@@ -13,7 +13,7 @@ export default function ProfilePage() {
       <article className={styles.profile}><UserProfile /></article>
       <section className={styles.links} aria-labelledby="links-title">
         <div className={styles.sectionHeader}><h2 id="links-title">더 알아보기</h2><ManageLinksButton /></div>
-        <ProfileLinks />
+        <ProfileLinks showClickCount />
       </section>
       <footer className={styles.footer}><span>© 2026 mylink</span><span>나만의 이야기를 담은 링크</span></footer>
     </div>

@@ -45,7 +45,7 @@ export function LinksList() {
           {loading && <p role="status" className="py-6 text-muted-foreground">링크를 불러오는 중…</p>}
           {error && <p role="alert" className="py-6 text-destructive">{error}</p>}
           <ul className="space-y-4">
-            {links.map((link) => <li key={link.id}><LinkCard key={`manage-${link.id}`} link={link} mode="manage" /></li>)}
+            {links.map((link) => <li key={link.id}><LinkCard key={`manage-${link.id}`} ownerId={user.uid} link={link} mode="manage" /></li>)}
           </ul>
           {!loading && !error && links.length === 0 && <p className="rounded-xl border border-dashed p-8 text-center text-muted-foreground">아직 등록된 링크가 없어요.</p>}
         </section>}

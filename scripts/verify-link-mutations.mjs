@@ -156,6 +156,7 @@ const cardHarness = harness();
 let deletions = 0;
 const deleteRequest = deferred();
 const { LinkCard } = load("src/components/links/link-card.tsx", {
+  "firebase/firestore": sdk, "@/lib/firebase": { firestore: {} },
   react: cardHarness.react,
   "@/components/links/link-form": { LinkForm: "LinkForm" },
   "@/components/links/links-provider": { useLinks: () => ({ error: null, updateLink: async () => {}, deleteLink: () => { deletions++; return deleteRequest.promise; } }) },

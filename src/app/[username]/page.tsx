@@ -27,7 +27,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
     </article>
     <section className="mt-8" aria-labelledby="public-links-title">
       <h2 id="public-links-title" className="mb-5 text-lg font-bold">더 알아보기</h2>
-      <ul className="space-y-4">{profile.links.map((link) => <li key={link.id}><LinkCard link={link} mode="view" /></li>)}</ul>
+      <ul className="space-y-4">{profile.links.map((link) => <li key={link.id}><LinkCard ownerId={profile.uid} link={link} mode="view" /></li>)}</ul>
       {!profile.links.length && <p className="py-6 text-sm text-muted-foreground">아직 등록된 링크가 없어요.</p>}
     </section>
   </main>;

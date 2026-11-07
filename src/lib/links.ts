@@ -9,6 +9,7 @@ export type ProfileLink = {
   isExternal: boolean;
   badge: string | null;
   displayOrder: number;
+  clickCount?: number;
 };
 
 export function validateLink(title: string, url: string) {

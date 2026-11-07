@@ -19,6 +19,7 @@ export async function getPublicProfile(name: string) {
     const link = entry.data();
     if (typeof link.title !== "string" || typeof link.url !== "string" || Object.keys(validateLink(link.title, link.url)).length) return [];
     return [{
+      clickCount: typeof link.clickCount === "number" ? link.clickCount : 0,
       id: entry.id, title: link.title, url: link.url,
       description: typeof link.description === "string" ? link.description : "",
       category: typeof link.category === "string" ? link.category : "other",
@@ -29,7 +30,7 @@ export async function getPublicProfile(name: string) {
     } satisfies ProfileLink];
   });
   return {
-    username: key, displayName: data.displayName,
+    uid: data.uid, username: key, displayName: data.displayName,
     bio: typeof data.bio === "string" ? data.bio : "",
     photoURL: typeof data.photoURL === "string" && data.photoURL.startsWith("https://") ? data.photoURL : "",
     links,

@@ -1,7 +1,9 @@
 "use client";
 
+import { doc, increment, updateDoc } from "firebase/firestore";
+import { auth, firestore } from "@/lib/firebase";
 import { useRef, useState } from "react";
-import { Pencil, Trash2, ArrowUpRight, BookOpen, FolderOpen, MessageCircle, Link2, type LucideIcon } from "lucide-react";
+import { Eye, Pencil, Trash2, ArrowUpRight, BookOpen, FolderOpen, MessageCircle, Link2, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,7 +15,7 @@ import type { ProfileLink } from "@/lib/links";
 const icons: Record<string, LucideIcon> = { FolderOpen, BookOpen, Instagram: MessageCircle };
 const categories: Record<string, string> = { portfolio: "작업물", blog: "기록", social: "일상", other: "기타" };
 
-export function LinkCard({ link, mode }: { link: ProfileLink; mode: "view" | "manage" }) {
+export function LinkCard({ link, mode, ownerId, showClickCount = mode === "manage" }: { link: ProfileLink; ownerId: string; mode: "view" | "manage"; showClickCount?: boolean }) {
   const { updateLink, deleteLink, error } = useLinks();
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -45,6 +47,14 @@ export function LinkCard({ link, mode }: { link: ProfileLink; mode: "view" | "ma
     }
   }
 
+  function recordClick() {
+    void auth.authStateReady().then(() => {
+      if (auth.currentUser?.uid === ownerId) return;
+      return updateDoc(doc(firestore, "users", ownerId, "links", link.id), { clickCount: increment(1) });
+    })
+      .catch((cause) => console.error("Failed to record link click:", cause));
+  }
+
   const Icon = icons[link.icon] ?? Link2;
   return (
     <Card className="py-6 sm:py-7">
@@ -55,6 +65,7 @@ export function LinkCard({ link, mode }: { link: ProfileLink; mode: "view" | "ma
         <div className="min-w-0 flex-1">
           <div className="mb-2 flex flex-wrap items-center gap-2">
             <span className="text-xs text-muted-foreground">{categories[link.category] ?? link.category}</span>
+            {showClickCount && (<span className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-muted px-2 py-1 text-xs tabular-nums text-muted-foreground" title="링크 클릭 수"><Eye className="size-3.5" aria-hidden="true" /><span className="sr-only">링크 클릭 수: </span>{(link.clickCount ?? 0).toLocaleString("ko-KR")}</span>)}
             {link.badge && <Badge variant="secondary">{link.badge}</Badge>}
           </div>
           <h3 className="break-words text-lg font-semibold tracking-tight">{link.title}</h3>
@@ -91,7 +102,7 @@ export function LinkCard({ link, mode }: { link: ProfileLink; mode: "view" | "ma
             </section>
           ) : (
             <Button asChild variant="link" className="mt-4 min-h-11 px-0">
-              <a href={link.url} target={link.isExternal ? "_blank" : undefined} rel={link.isExternal ? "noopener noreferrer" : undefined} aria-label={`${link.title}: ${link.actionText}${link.isExternal ? " (새 탭에서 열기)" : ""}`}>
+              <a href={link.url} onClick={recordClick} onAuxClick={(event) => { if (event.button === 1) recordClick(); }} target={link.isExternal ? "_blank" : undefined} rel={link.isExternal ? "noopener noreferrer" : undefined} aria-label={`${link.title}: ${link.actionText}${link.isExternal ? " (새 탭에서 열기)" : ""}`}>
                 {link.actionText}<ArrowUpRight className="size-4" aria-hidden="true" />
                 {link.isExternal && <span className="sr-only"> (새 탭에서 열기)</span>}
               </a>
