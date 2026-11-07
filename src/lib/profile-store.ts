@@ -50,11 +50,11 @@ async function writeProfile(user: User, draft: ProfileDraft | null, attempt = 0,
     const oldRef = oldKey && oldKey !== key ? doc(firestore, "displayNames", oldKey) : null;
     const oldReservation = oldRef ? await transaction.get(oldRef) : null;
     let username = normalizeUsername(draft?.username ?? (typeof existing?.username === "string" ? existing.username : ""));
-    if (!username) {
+    if (!username || (!draft && validateUsername(username))) {
       username = getEmailDisplayName(user.email).toLowerCase().replace(/[^a-z0-9_-]/g, "-").replace(/^-+/, "").slice(0, 30);
       if (validateUsername(username)) username = "user-" + user.uid.replace(/[^a-zA-Z0-9]/g, "").slice(0, 12).toLowerCase();
     }
-    if (!draft && addressAttempt && !existing?.username) {
+    if (!draft && addressAttempt && (typeof existing?.username !== "string" || validateUsername(existing.username))) {
       const suffix = "-" + user.uid.replace(/[^a-zA-Z0-9]/g, "").slice(0, 8).toLowerCase() + (addressAttempt > 1 ? addressAttempt : "");
       username = username.slice(0, 30 - suffix.length) + suffix;
     }

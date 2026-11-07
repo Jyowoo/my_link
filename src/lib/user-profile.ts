@@ -27,5 +27,5 @@ export function normalizeUsername(username: string) { return username.normalize(
 export function validateUsername(username: string): string | undefined {
   const value = normalizeUsername(username);
   if (!/^[a-z0-9][a-z0-9_-]{2,29}$/.test(value)) return "주소 아이디는 영문·숫자로 시작하는 3~30자의 영문·숫자·밑줄·하이픈으로 입력해주세요.";
-  if (["links", "preview", "settings", "api", "_next"].includes(value)) return "서비스에서 사용하는 주소예요. 다른 아이디를 입력해주세요.";
+  if (["links", "preview", "stats", "settings", "api", "_next"].includes(value)) return "서비스에서 사용하는 주소예요. 다른 아이디를 입력해주세요.";
 }

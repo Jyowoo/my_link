@@ -36,6 +36,7 @@ export function LinksList() {
           {user && !authLoading && <>
           <div className="mt-6 flex flex-wrap items-center gap-2">
             <Badge variant="outline">링크 {links.length}개</Badge>
+            <Button asChild variant="outline" size="sm"><Link href="/stats">링크 통계</Link></Button>
           </div>
           <div className="mt-5"><AddLinkDialog onAdd={addLink} disabled={loading || !!error} /></div>
           </>}

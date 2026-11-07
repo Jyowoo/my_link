@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { toast } from "sonner";
-import { Pencil, ChevronDown, Copy, ExternalLink, LogOut, UserRound } from "lucide-react";
+import { ChartColumn, Pencil, ChevronDown, Copy, ExternalLink, LogOut, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/components/auth/auth-provider";
@@ -35,6 +35,7 @@ export function ProfileMenu() {
           <p className="truncate text-xs font-normal text-muted-foreground">{profile?.email || user.email}</p>
         </DropdownMenuLabel>
         <DropdownMenuSeparator className="my-1 h-px bg-border" />
+        <DropdownMenuItem asChild><Link href="/stats"><ChartColumn aria-hidden="true" />링크 통계</Link></DropdownMenuItem>
         <DropdownMenuItem asChild><Link href="/settings/profile"><Pencil aria-hidden="true" />프로필 수정</Link></DropdownMenuItem>
         <DropdownMenuItem asChild disabled={!pagePath}><Link href={pagePath ?? "/"}><UserRound aria-hidden="true" />내 페이지로 이동</Link></DropdownMenuItem>
         <DropdownMenuItem disabled={!pagePath} onSelect={copyLink}><Copy aria-hidden="true" />링크 복사</DropdownMenuItem>
